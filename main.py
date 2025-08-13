@@ -51,25 +51,24 @@ class Ingame:
       for event in events:
         if event.type == pygame.QUIT:
           screen.exit()
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
           if event.key == pygame.K_ESCAPE:
             screen.exit()
-          if event.key == pygame.K_F3:
+          elif event.key == pygame.K_F3:
             self.F3 = not self.F3
-
-          if event.key == pygame.K_i:
+          elif event.key == pygame.K_i:
             self.inventory_open = not self.inventory_open
             player.inventory.set_open(self.inventory_open)
-
-          if event.type == pygame.KEYDOWN:
+          else:
             for i, key in enumerate([
               pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5,
               pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_0
-              ]):
+            ]):
               if event.key == key:
                 player.inventory.select_hotbar(i)
+                break
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
           player.mine_at_mouse(event.pos)
 
       if not merchant.is_talking:
