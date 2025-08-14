@@ -1,45 +1,8 @@
 import os
-import pygame
-pygame.init()
 from pygame.sprite import Sprite, Group
 from pytmx.util_pygame import load_pygame
-
-ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
-MAPS_PATH = os.path.join(ASSETS_PATH, "maps")
-
-class Tile(Sprite):
-  def __init__(self, image, pos, group):
-    super().__init__(group)
-    self.image = image
-    self.rect = self.image.get_rect(topleft=pos)
-
-class OreTile(Sprite):
-  # HP/드랍 테이블
-  HP_TABLE = {"stone": 2, "coal": 5, "row_iron" : 9}
-  DROP_TABLE = {
-    "stone": ("stone2", 1),
-    "coal": ("coal", 1),
-    "row_iron": ("row_iron", 1),
-    "row_gold": ("gold_ore", 1),
-}
-  # 여러 그룹에 동시에 등록되도록 *groups 사용
-  def __init__(self, image, pos, groups, ore_type="stone"):
-    super().__init__(*groups)
-    self.image = image
-    self.rect = self.image.get_rect(topleft=pos)
-    self.ore_type = ore_type
-    self.max_hp = self.HP_TABLE.get(ore_type, 5)
-    self.hp = self.max_hp
-    self.mine_sound = pygame.mixer.Sound("util\\assets\\audio\ore_mine.wav")
-
-  def mine(self, dmg=2):
-    self.hp -= dmg
-    if self.mine_sound:
-        self.mine_sound.play()
-    return self.hp <= 0
-
-  def drop(self):
-    return self.DROP_TABLE.get(self.ore_type, ("stone", 1))
+from itemstorge.itemsprites import OreTile, Tile
+from settings import MAPS_PATH
 
 class TMXMap:
   instance = None

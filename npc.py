@@ -33,7 +33,7 @@ class Merchant(pygame.sprite.Sprite):
 
       btn_buy = Button(
         rect=(panel_rect.left + 40, panel_rect.top + 120, 260, 48),
-        text="Buy Automation (500G)", bsign=True
+        text="Buy CraftTable (100G)", bsign=True
       )
       btn_close = Button(
         rect=(panel_rect.right - 120, panel_rect.top + 20, 100, 36),
@@ -62,7 +62,7 @@ class Merchant(pygame.sprite.Sprite):
 
         # 상점 버튼
         if sig_buy is True:
-          price = 500
+          price = 100
           if getattr(player, "has_auto", False):
             feedback_msg = "Already owned."
           elif getattr(player, "gold", 0) < price:
