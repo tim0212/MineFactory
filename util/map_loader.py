@@ -22,7 +22,7 @@ class TMXMap:
     self.decor = Group()
     self.collision = Group()
     self.ores = Group()        # 광석 전용
-    self.render_all = Group()  # 화면 그리기용(충돌 제외)
+    self.render_all = Group()  # 화면 그리기용
 
     self.spawn_pos = (0, 0)
     self._build()
@@ -50,23 +50,8 @@ class TMXMap:
 
     ore_cnt = 0
 
-    # 레이어 순서대로 한 번만 처리
     for layer in self.tmx.visible_layers:
       name = (getattr(layer, "name", "") or "").lower()
-
-      # elif hasattr(layer, "layer_name"): ex)
-      #  for layer_name in layer:
-      #    if getattr(layer_name, "name", "") == "player_spawn":
-      #      self.spawn_pos = (int(obj.x), int(obj.y))
-      #      continue
-      #    gid = getattr(layer_name, "gid", 0)
-      #    if gid:
-      #      image = self.tmx.get_tile_image_by_gid(gid)
-      #      if image:
-      #        h = image.get_height()
-      #        Tile(image, (int(obj.x), int(obj.y) - h), self.render_all)
-
-      # 1) 타일 레이어
       if hasattr(layer, "tiles"):
         for x, y, image in layer.tiles():
           if image is None:
@@ -111,7 +96,7 @@ class TMXMap:
     print(f"\033[034m[TMX]\033[0m ores count = {ore_cnt}")
     print(f"\033[034m[TMX]\033[0m tiles total={total}, loaded={have}")
     if have == 0:
-      print("\033[034m[TMX]\033[0m ⚠ 타일 이미지가 하나도 로드되지 않았습니다. (타일셋 경로 확인)")
+      print("\033[034m[TMX]\033[0m  타일 이미지가 하나도 로드되지 않았습니다. (타일셋 경로 확인)")
 
   @property
   def pixel_size(self):

@@ -1,5 +1,14 @@
 from pygame.sprite import Sprite
 import os, pygame
+from util.__init__ import Loader
+
+ITEM_DICT = {
+  "pickaxe" : Loader.load_image("image\\tools\\pickaxe.png", scale=(32, 32)),
+  "coal" : Loader.load_image("image\\ore\\Coal2.png", scale=(32, 32)),
+  "row_iron" : Loader.load_image("image\\ore\\row_iron.png", scale=(32, 32)),
+  "stone2" : Loader.load_image("image\\ore\\stone2.png", scale=(32, 32))
+  }
+
 
 class Tile(Sprite):
   def __init__(self, image, pos, group):
@@ -36,6 +45,10 @@ class OreTile(Sprite):
   def drop(self):
     return self.DROP_TABLE.get(self.ore_type, ("stone", 1))
 
+class CraftTable(Sprite):
+  def __init__(self):
+    self.img = Loader.load_image("image\\tools\crafttable.png")
 
 class item:
-  pass
+  def __init__(self):
+    self.item_table = {"row_iron" : ""}

@@ -10,14 +10,17 @@ class Merchant(pygame.sprite.Sprite):
     super().__init__()
     self.image = Loader.load_image(image_path, scale=(32, 32))
     self.rect = self.image.get_rect(topleft=pos)
-    self.name = "merchant"  # fixed typo
+    self.name = "merchant"
     self.blocking = blocking
     self.hitbox = self.rect.copy()
     self.is_talking = False
-    self.lines = [
-      "I have good things",
-      "Want to check it out?"
-    ]
+    self.lines = [{
+      1 : "I have good things",
+      2 : "Want to check it out?"
+    },
+    {
+      1 : "Ok"
+    }]
     self._line_idx = 0
 
   def toggle_talk(self):
@@ -26,25 +29,23 @@ class Merchant(pygame.sprite.Sprite):
 
   def next_line(self, player):
     def open_shop(player):
-      # ----- create panel and buttons ONCE per shop open -----
       pygame.mouse.set_visible(True)
       w, h = screen.surface.get_size()
-      panel_rect = pygame.Rect(int(w * 0.1), int(h * 0.1), int(w * 0.8), int(h * 0.8))
+      panelR = pygame.Rect(int(w * 0.1), int(h * 0.1), int(w * 0.8), int(h * 0.8))
 
       btn_buy = Button(
-        rect=(panel_rect.left + 40, panel_rect.top + 120, 260, 48),
+        rect=(panelR.left + 40, panelR.top + 120, 260, 48),
         text="Buy CraftTable (100G)", bsign=True
       )
       btn_close = Button(
-        rect=(panel_rect.right - 120, panel_rect.top + 20, 100, 36),
+        rect=(panelR.right - 120, panelR.top + 20, 100, 36),
         color=(200, 80, 80), hover_color=(220, 100, 100),
         text="Close", bsign="CLOSE"
       )
 
-      feedback_msg = ""  # "Already owned." / "Not enough gold."
+      feedback_msg = ""
       clock = pygame.time.Clock()
 
-      # ----- modal loop -----
       while True:
         events = pygame.event.get()
         for e in events:
@@ -77,25 +78,24 @@ class Merchant(pygame.sprite.Sprite):
         overlay.fill((0, 0, 0, 160))
         screen.surface.blit(overlay, (0, 0))
 
-        pygame.draw.rect(screen.surface, (245, 245, 250), panel_rect, border_radius=12)
-        pygame.draw.rect(screen.surface, (30, 30, 50), panel_rect, width=3, border_radius=12)
+        pygame.draw.rect(screen.surface, (245, 245, 250), panelR, border_radius=12)
+        pygame.draw.rect(screen.surface, (30, 30, 50), panelR, width=3, border_radius=12)
 
-        text.render((panel_rect.centerx, panel_rect.top + 50), "Automation Shop",
+        text.render((panelR.centerx, panelR.top + 50), "Tool Shop",
                     True, (20, 20, 30), centerpos="midtop", size=42)
         sub = f"Gold: {getattr(player, 'gold', 0)}G"
-        text.render((panel_rect.left + 40, panel_rect.top + 80), sub,
+        text.render((panelR.left + 40, panelR.top + 80), sub,
                     True, (40, 40, 60), centerpos="topleft", size=28)
 
         if feedback_msg:
-          text.render((panel_rect.left + 40, panel_rect.bottom - 80), feedback_msg,
+          text.render((panelR.left + 40, panelR.bottom - 80), feedback_msg,
                       True, (200, 60, 60), centerpos="topleft", size=24)
 
-        # item description (English only)
-        text.render((panel_rect.left + 40, panel_rect.top + 170), "Automation Module",
+        text.render((panelR.left + 40, panelR.top + 170), "Automation Module",
                     True, (30, 30, 40), centerpos="topleft", size=28)
-        text.render((panel_rect.left + 40, panel_rect.top + 205), "- Auto mining/processing",
+        text.render((panelR.left + 40, panelR.top + 205), "- Auto mining/processing",
                     True, (70, 70, 90), centerpos="topleft", size=22)
-        text.render((panel_rect.left + 40, panel_rect.top + 232), "- Maintenance: 0G",
+        text.render((panelR.left + 40, panelR.top + 232), "- Maintenance: 0G",
                     True, (70, 70, 90), centerpos="topleft", size=22)
 
         btn_buy.draw()
@@ -121,16 +121,16 @@ class Merchant(pygame.sprite.Sprite):
     dx = nx - px; dy = ny - py
     return (dx*dx + dy*dy) ** 0.5 <= TALK_RANGE
 
-  def calculate_position(self):
-    tl = Camera.instance.apply(self.rect)
-    x = int(tl.x + self.rect.width // 2)
-    y = int(tl.y - 6)
-    return x, y
-
   def draw_nameplate(self):
+    def calculate_position():
+      tl = Camera.instance.apply(self.rect)
+      x = int(tl.x + self.rect.width // 2)
+      y = int(tl.y - 6)
+      return x, y
+
     if not screen.surface: return
     name = self.name
-    x, y = self.calculate_position()
+    x, y = calculate_position()
     bg = pygame.Surface((max(60, len(name)*10), 18), pygame.SRCALPHA)
     bg.fill((0, 0, 0, 140))
     screen.surface.blit(bg, bg.get_rect(center=(x, y)))
@@ -146,13 +146,13 @@ class Merchant(pygame.sprite.Sprite):
     rect = panel.get_rect(midbottom=(w//2, h - 12))
     screen.surface.blit(panel, rect)
 
-    # current line
     if 0 <= self._line_idx < len(self.lines):
-      line = self.lines[self._line_idx]
+      for i in range(len(self.lines[self._line_idx])):
+        lines = self.lines[self._line_idx][i + 1]
+        text.render((rect.centerx, rect.top + 24 * (i + 1)), lines, True, (255, 255, 255), size=22)
     else:
-      line = ""
-    text.render((rect.centerx, rect.top + 24), line, True, (255, 255, 255), size=22)
-    # English hints only
+      lines = ""
+
     text.render((rect.right - 110, rect.bottom - 18),
                 "E: No  SPACE: Yes", True, (200, 200, 200),
                 size=16, centerpos="center")

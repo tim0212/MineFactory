@@ -2,16 +2,11 @@ import pygame
 from camera import Camera
 from util.__init__ import Loader, screen, text as texts
 from util.map_loader import TMXMap
+from itemstorge.itemsprites import ITEM_DICT
 
 MAX_STACK = 64
 ROWS, COLS = 10, 5
 DEBUG_MINING = True  # False로 바꾸면 로그 끔
-ITEM_DICT = {
-  "pickaxe" : Loader.load_image("image\\tools\\pickaxe.png", scale=(32, 32)),
-  "coal" : Loader.load_image("image\\ore\\Coal2.png", scale=(32, 32)),
-  "row_iron" : Loader.load_image("image\\ore\\row_iron.png", scale=(32, 32)),
-  "stone2" : Loader.load_image("image\\ore\\stone2.png", scale=(32, 32))
-  }
 
 SLOT_W, SLOT_H = 32, 32
 SLOT_GAP = 7
@@ -27,6 +22,10 @@ for r in range(ROWS):
     x = INV_ORIGIN_X + c * (SLOT_W + SLOT_GAP)
     y = INV_ORIGIN_Y - r * (SLOT_H + SLOT_GAP)  # 아래에서 위로 쌓이게 10x5인벤
     SLOT_DICT[(r, c)] = (x, y)
+
+on = True
+save = 0
+swich = True
 
 x = screen.surface.get_width() - 10
 class Inventory:
@@ -77,16 +76,30 @@ class Inventory:
   def set_open(self, open_: bool):
     self.hotbar_only = not open_
 
-  # 숫자키로 핫바 선택
+  # 한번 더 눌으면 칸 지우기
   def select_hotbar(self, idx: int):
-    self.selected_hotbar = max(0, min(9, idx))
+    global on, save, swich
+    if save == idx:
+      on = not on
+    if save != idx: on = True
 
-  # 현재 손에 든 아이템 id (없으면 "")
+    save = idx
+
+    if on:
+      print("on")
+      self.selected_hotbar = max(0, min(9, idx))
+    else:
+      self.selected_hotbar = None
+      print("None")
+
   def current_item_id(self):
     global cell
+    cell = None
 
-    cell = self.slots[0][self.selected_hotbar]
-    if isinstance(cell, dict): return cell["id"]
+    if self.selected_hotbar is not None:
+        cell = self.slots[0][self.selected_hotbar]
+        if isinstance(cell, dict):
+            return cell["id"]
     return ""
 
   def item_info_show(self):
@@ -309,7 +322,6 @@ class Player(pygame.sprite.Sprite):
         if math.sqrt(best) > 16:
           target = None
 
-    # 3) 플레이어와의 거리 제한(50px)
     if target:
       import math
       px, py = self.rect.center
